@@ -1,6 +1,6 @@
 Jarvis
 ======
-Iron man's faithful personal assistant.
+My implementation of Iron man's faithful personal assistant.
 
 To get started create an `.env` file with contents similar to:
 ```

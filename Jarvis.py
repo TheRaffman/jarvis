@@ -18,7 +18,6 @@ def talk(text):
     engine.say (text)
     engine.runAndWait()
 
-
 def take_command():
     command_was_for_jarvis = False
     try:
@@ -70,7 +69,6 @@ def run_jarvis():
     elif "search" in command:
         query = command.replace("search", "")
         info = wikipedia.summary(query, sentences=2)
-#        info = wikipedia.summary(person, 1)
         print (info)
         talk (info)
 

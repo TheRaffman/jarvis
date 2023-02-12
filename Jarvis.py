@@ -36,7 +36,8 @@ def take_command():
                 else:
                     print("This command wasn't for Jarvis")
 
-    except:
+    except AssertionError as error:
+        print("Exception in 'take_command' " + error)
         pass
     return command
 
@@ -79,8 +80,8 @@ def run_jarvis():
         user_wants_to_continue = False
 
     else:
-        talk("Sorry sir i want listening, say that again")
-        print("Sorry sir i want listening, say that again")
+        talk("Sorry sir i wasn't listening, say that again")
+        print("Sorry sir i wasn't listening, say that again")
 
     return user_wants_to_continue
 

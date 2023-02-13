@@ -1,3 +1,4 @@
+from phue import Bridge
 import speech_recognition as sr
 import pyttsx3
 import pywhatkit
@@ -10,9 +11,32 @@ from dotenv import load_dotenv
 load_dotenv()
 
 listener = sr.Recognizer()
+bridge_ip_address = os.environ.get("bridge_ip_address")
+hue_bridge = Bridge(bridge_ip_address)
+
+print("")
+print("Finding installed voices...")
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty("voices")
-engine.setProperty("voice",voices[0].id)
+
+for voiceinfo in voices:
+    print("  * Found Voice: " + voiceinfo.id)
+voice_id = int(os.environ.get("voice_id"))
+engine.setProperty("voice",voices[voice_id].id)
+
+print("")
+print("Finding Hue lights...")
+lights = hue_bridge.get_light_objects('name')
+for light in lights:
+    print("  * Found light: " + light)
+
+
+def join_hue_bridge():
+    hue_bridge.connect()
+    print("Hue bridge is now connected.")
+
+def control_hue():
+    print("ok")
 
 def talk(text):
     engine.say (text)
@@ -79,6 +103,15 @@ def run_jarvis():
     elif "exit" in command:
         user_wants_to_continue = False
 
+    elif "join bridge" in command:
+        join_hue_bridge()
+
+    elif "light on" in command:
+        lights["Right lamp"].on = True
+
+    elif "light off" in command:
+        lights["Right lamp"].on = False
+
     else:
         talk("Sorry sir i wasn't listening, say that again")
         print("Sorry sir i wasn't listening, say that again")
@@ -101,6 +134,7 @@ def search_google (search_item):
 # Main loop
 openai_key = os.environ.get("openai_key")
 
+print("")
 should_i_continue = True
 while should_i_continue:
     should_i_continue = run_jarvis()

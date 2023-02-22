@@ -1,5 +1,6 @@
+import time
+from JarvisHue import JarvisHue
 import azure.cognitiveservices.speech as speechsdk
-from phue import Bridge
 import speech_recognition as sr
 import pyttsx3
 import pywhatkit
@@ -12,8 +13,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 listener = sr.Recognizer()
-bridge_ip_address = os.environ.get("bridge_ip_address")
-hue_bridge = Bridge(bridge_ip_address)
+
+raffs_hue = JarvisHue()
+raff_bedroom_group_name = 'Raff’s Bedroom'
 
 print("")
 print("Finding installed voices...")
@@ -24,29 +26,6 @@ for voiceinfo in voices:
     print("  * Found Voice: " + voiceinfo.id)
 voice_id = int(os.environ.get("voice_id"))
 engine.setProperty("voice",voices[voice_id].id)
-
-print("")
-print("Finding Hue lights...")
-lights = hue_bridge.get_light_objects('name')
-for light in lights:
-    print("  * Found light: " + light)
-
-print("")
-print("Finding Hue light groups...")
-raff_bedroom_group_name = 'Raff’s Bedroom'
-light_groups = hue_bridge.get_group()
-for light_group in light_groups:
-    print("  * Found light group with ID: " + light_group + " and name: " + light_groups[light_group]['name'])
-    if (light_groups[light_group]['name'] == raff_bedroom_group_name):
-        raff_bedroom_group_id = light_group
-        print("    >> Found and stored Raff’s Bedroom (" + raff_bedroom_group_id + ")")
-
-def join_hue_bridge():
-    hue_bridge.connect()
-    print("Hue bridge is now connected.")
-
-def control_hue():
-    print("ok")
 
 def talk(text):
     engine.say (text)
@@ -137,16 +116,13 @@ def run_jarvis():
         user_wants_to_continue = False
 
     elif "join bridge" in command:
-        join_hue_bridge()
+        raffs_hue.join_hue_bridge()
 
-    elif "light on" in command:
-        raffs_bedroom = hue_bridge.get_group_id_by_name("Raff's Bedroom")
-        raffs_bedroom.on = True
+    elif "lights on" in command:
+        raffs_hue.turn_on_group(raff_bedroom_group_name)
 
-    elif "light off" in command:
-        #lights["Raff main"].on = False
-        raffs_bedroom = hue_bridge.get_group_id_by_name("Raff's Bedroom")
-        raffs_bedroom.on = False
+    elif "lights off" in command:
+        raffs_hue.turn_off_group(raff_bedroom_group_name)
 
     else:
         talk("Sorry sir i wasn't listening, say that again")
@@ -170,16 +146,10 @@ def search_google (search_item):
 # Main loop
 openai_key = os.environ.get("openai_key")
 
-
-
 print("")
 should_i_continue = True
-#while should_i_continue:
-#    should_i_continue = run_jarvis()
-
-lights_in_group = hue_bridge.get_group(raff_bedroom_group_name, 'lights')
-for light in lights_in_group:
-    hue_bridge.set_light(int(light), 'on', True)
+while should_i_continue:
+    should_i_continue = run_jarvis()
 
 # User has said exit...
 talk("Glad I could help, see you again soon.")

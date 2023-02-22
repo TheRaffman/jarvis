@@ -31,6 +31,15 @@ lights = hue_bridge.get_light_objects('name')
 for light in lights:
     print("  * Found light: " + light)
 
+print("")
+print("Finding Hue light groups...")
+raff_bedroom_group_name = 'Raff’s Bedroom'
+light_groups = hue_bridge.get_group()
+for light_group in light_groups:
+    print("  * Found light group with ID: " + light_group + " and name: " + light_groups[light_group]['name'])
+    if (light_groups[light_group]['name'] == raff_bedroom_group_name):
+        raff_bedroom_group_id = light_group
+        print("    >> Found and stored Raff’s Bedroom (" + raff_bedroom_group_id + ")")
 
 def join_hue_bridge():
     hue_bridge.connect()
@@ -131,10 +140,13 @@ def run_jarvis():
         join_hue_bridge()
 
     elif "light on" in command:
-        lights["Right lamp"].on = True
+        raffs_bedroom = hue_bridge.get_group_id_by_name("Raff's Bedroom")
+        raffs_bedroom.on = True
 
     elif "light off" in command:
-        lights["Right lamp"].on = False
+        #lights["Raff main"].on = False
+        raffs_bedroom = hue_bridge.get_group_id_by_name("Raff's Bedroom")
+        raffs_bedroom.on = False
 
     else:
         talk("Sorry sir i wasn't listening, say that again")
@@ -162,8 +174,12 @@ openai_key = os.environ.get("openai_key")
 
 print("")
 should_i_continue = True
-while should_i_continue:
-    should_i_continue = run_jarvis()
+#while should_i_continue:
+#    should_i_continue = run_jarvis()
+
+lights_in_group = hue_bridge.get_group(raff_bedroom_group_name, 'lights')
+for light in lights_in_group:
+    hue_bridge.set_light(int(light), 'on', True)
 
 # User has said exit...
 talk("Glad I could help, see you again soon.")

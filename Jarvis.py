@@ -23,7 +23,8 @@ voice = JarvisVoice()
 def take_command():
     the_boss = os.environ.get("the_boss")
     voice.talk ("How may I assist you " + the_boss + "?")
-    command = listening.recognize_from_microphone()
+    # command = listening.recognize_from_microphone_online()
+    command = listening.recognize_from_microphone_offline()
     print("take command heard: " + command)
     return command.lower()
 
@@ -31,7 +32,7 @@ def wait_for_instruction():
     command_was_for_jarvis = False
     while command_was_for_jarvis == False:
         print ("Listening for wake word...")
-        command = listening.recognize_from_microphone()
+        command = listening.recognize_from_microphone_offline()
         print("wait_for_instruction heard: " + command)
         command = command.lower()
         if "jarvis" in command:
@@ -40,7 +41,6 @@ def wait_for_instruction():
             print(".", end = '')
 
     return command_was_for_jarvis
-
 
 def run_jarvis():
     user_wants_to_continue = True

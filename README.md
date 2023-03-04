@@ -14,3 +14,5 @@ pip install -r requirements.txt
  ```
 
 This is a work in progress, check back soon!
+
+This is a collaboration between TheRaffman and Belogix.

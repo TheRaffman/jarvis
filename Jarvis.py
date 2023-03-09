@@ -41,12 +41,13 @@ def wait_for_instruction():
         else:
             print(".", end = '')
 
-    return command_was_for_jarvis
+    return command.replace("jarvis", "").lower()
 
 def run_jarvis():
     user_wants_to_continue = True
-    wait_for_instruction()
-    command = take_command()
+    command = wait_for_instruction()
+    if command == "":
+        command = take_command()
     print(command)
     if "play" in command:
         song = command.replace("play", "")

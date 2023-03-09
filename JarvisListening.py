@@ -11,6 +11,7 @@ class JarvisListening:
     # None yet
 
     def __init__(self):
+        self.__initialise_offline()
         print("I'm Listening")
 
     def recognize_from_microphone_online(self):
@@ -37,49 +38,52 @@ class JarvisListening:
                 print("Error details: {}".format(cancellation_details.error_details))
                 print("Did you set the speech resource key and region values?")
 
-    def recognize_from_microphone_offline(self):
+    def __initialise_offline(self):
+        print("Initialise_offline member variables...")
+
         # list all audio devices known to your system
         print("Display input/output devices")
         print(sd.query_devices())
 
         # get the samplerate - this is needed by the Kaldi recognizer
-        device_info = sd.query_devices(sd.default.device[0], 'input')
-        samplerate = int(device_info['default_samplerate'])
+        self.device_info = sd.query_devices(sd.default.device[0], 'input')
+        self.samplerate = int(self.device_info['default_samplerate'])
 
         # display the default input device
-        print("===> Initial Default Device Number:{} Description: {}".format(sd.default.device[0], device_info))
+        print("===> Initial Default Device Number:{} Description: {}".format(sd.default.device[0], self.device_info))
 
         # setup queue and callback function
-        q = queue.Queue()
-
-        def recordCallback(indata, frames, time, status):
-            if status:
-                print(status, file=sys.stderr)
-            q.put(bytes(indata))
+        self.q = queue.Queue()
 
         # build the model and recognizer objects.
         print("===> Build the model and recognizer objects.  This will take a few minutes.")
-        model = Model(r"C:\Users\peter\.cache\vosk\vosk-model-small-en-us-0.15")
-        recognizer = KaldiRecognizer(model, samplerate)
-        recognizer.SetWords(False)
+        model = Model(os.environ.get("vosk_model_path"))
+        self.recognizer = KaldiRecognizer(model, self.samplerate)
+        self.recognizer.SetWords(False)
 
-        print("===> Begin recording. Press Ctrl+C to stop the recording ")
+    def recognize_from_microphone_offline(self):
+        def recordCallback(indata, frames, time, status):
+            if status:
+                print(status, file=sys.stderr)
+            self.q.put(bytes(indata))
+
+        spokenPhrase = "I didn't hear a thing boss"
+
         try:
             with sd.RawInputStream(dtype='int16',
                                 channels=1,
                                 callback=recordCallback):
                 while True:
-                    data = q.get()        
-                    if recognizer.AcceptWaveform(data):
-                        recognizerResult = recognizer.Result()
-                        # convert the recognizerResult string into a dictionary  
-                        resultDict = json.loads(recognizerResult)
-                        if not resultDict.get("text", "") == "":
-                            print(recognizerResult)
-                        else:
-                            print("no input sound")
+                    data = self.q.get()        
+                    if self.recognizer.AcceptWaveform(data):
+                        recognizerResult = self.recognizer.Result()
+                        resultDictionary = json.loads(recognizerResult)
+                        if not resultDictionary.get("text", "") == "":
+                            resultsJson = json.loads(recognizerResult)
+                            spokenPhrase = resultsJson["text"]
+                            break
 
-        except KeyboardInterrupt:
-            print('===> Finished Recording')
         except Exception as e:
             print(str(e))
+        
+        return spokenPhrase

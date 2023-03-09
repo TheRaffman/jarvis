@@ -1,0 +1,14 @@
+# Who are we talking to?
+the_boss = "Tony Stark"
+
+# Philips Hue details
+bridge_ip_address = "192.168.0.1"
+hue_group_name = "Kitchen"
+
+# Keys for various online voice recognition systems
+openai_key = "N/A"
+azure_cognitiveservices_key = "N/A"
+
+# Text to speech values
+voice_id = "0"
+vosk_model_path = "C:\\Users\\someone\\.cache\\vosk\\vosk-model-small-en-us-0.15"

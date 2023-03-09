@@ -57,7 +57,7 @@ class JarvisListening:
 
         # build the model and recognizer objects.
         print("===> Build the model and recognizer objects.  This will take a few minutes.")
-        model = Model(r"C:\\Users\\peter\\.cache\\vosk\\vosk-model-small-en-us-0.15")
+        model = Model(os.environ.get("vosk_model_path"))
         self.recognizer = KaldiRecognizer(model, self.samplerate)
         self.recognizer.SetWords(False)
 
@@ -77,17 +77,12 @@ class JarvisListening:
                     data = self.q.get()        
                     if self.recognizer.AcceptWaveform(data):
                         recognizerResult = self.recognizer.Result()
-                        # convert the recognizerResult string into a dictionary  
-                        resultDict = json.loads(recognizerResult)
-                        if not resultDict.get("text", "") == "":
+                        resultDictionary = json.loads(recognizerResult)
+                        if not resultDictionary.get("text", "") == "":
                             resultsJson = json.loads(recognizerResult)
                             spokenPhrase = resultsJson["text"]
                             break
-                        else:
-                            print("I am Still listening...")
 
-        except KeyboardInterrupt:
-            print('===> Finished Recording')
         except Exception as e:
             print(str(e))
         

@@ -86,15 +86,18 @@ def run_jarvis():
     elif "join bridge" in command:
         hue_hub.join_hue_bridge()
 
-    elif "lights on" in command:
-        hue_hub.turn_on_group(hue_group_name)
-
-    elif "lights off" in command:
-        hue_hub.turn_off_group(hue_group_name)
+    # Handle various ways people might control lights, for example:
+    # "Turn lights on" or "Turn on lights" etc...
+    elif "lights" in command:
+        # Work out the intent of what to do with lights (include space to handle "office" etc)
+        if "on " in command:
+            hue_hub.turn_on_group(hue_group_name)
+        if "off " in command:
+            hue_hub.turn_off_group(hue_group_name)
 
     else:
-        voice.talk("Sorry sir i wasn't listening, say that again")
-        print("Sorry sir i wasn't listening, say that again")
+        voice.talk("Sorry sir I don't understand that command.")
+        print("Sorry sir I don't understand: " + command)
 
     return user_wants_to_continue
 

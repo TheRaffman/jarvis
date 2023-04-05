@@ -11,8 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Hue lights instance and group
-raffs_hue = JarvisHue()
-raff_bedroom_group_name = 'Raff’s Bedroom'
+hue_hub = JarvisHue()
+hue_group_name = os.environ.get("hue_group_name")
 
 # listening
 listening = JarvisListening()
@@ -23,6 +23,7 @@ voice = JarvisVoice()
 def take_command():
     the_boss = os.environ.get("the_boss")
     voice.talk ("How may I assist you " + the_boss + "?")
+    # We could check online for better accuracy?
     # command = listening.recognize_from_microphone_online()
     command = listening.recognize_from_microphone_offline()
     print("take command heard: " + command)
@@ -33,19 +34,20 @@ def wait_for_instruction():
     while command_was_for_jarvis == False:
         print ("Listening for wake word...")
         command = listening.recognize_from_microphone_offline()
-        print("wait_for_instruction heard: " + command)
+        print("wait command heard: " + command)
         command = command.lower()
         if "jarvis" in command:
             command_was_for_jarvis = True
         else:
             print(".", end = '')
 
-    return command_was_for_jarvis
+    return command.replace("jarvis", "").lower()
 
 def run_jarvis():
     user_wants_to_continue = True
-    wait_for_instruction()
-    command = take_command()
+    command = wait_for_instruction()
+    if command == "":
+        command = take_command()
     print(command)
     if "play" in command:
         song = command.replace("play", "")
@@ -82,17 +84,20 @@ def run_jarvis():
         user_wants_to_continue = False
 
     elif "join bridge" in command:
-        raffs_hue.join_hue_bridge()
+        hue_hub.join_hue_bridge()
 
-    elif "lights on" in command:
-        raffs_hue.turn_on_group(raff_bedroom_group_name)
-
-    elif "lights off" in command:
-        raffs_hue.turn_off_group(raff_bedroom_group_name)
+    # Handle various ways people might control lights, for example:
+    # "Turn lights on" or "Turn on lights" etc...
+    elif "lights" in command:
+        # Work out the intent of what to do with lights (include space to handle "office" etc)
+        if "on " in command:
+            hue_hub.turn_on_group(hue_group_name)
+        if "off " in command:
+            hue_hub.turn_off_group(hue_group_name)
 
     else:
-        voice.talk("Sorry sir i wasn't listening, say that again")
-        print("Sorry sir i wasn't listening, say that again")
+        voice.talk("Sorry sir I don't understand that command.")
+        print("Sorry sir I don't understand: " + command)
 
     return user_wants_to_continue
 

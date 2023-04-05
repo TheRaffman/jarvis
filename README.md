@@ -2,11 +2,7 @@ Jarvis
 ======
 My implementation of Iron man's faithful personal assistant.
 
-To get started create an `.env` file with contents similar to:
-```
-openai_key = "Your Open AI API key"
-the_boss = "Your name"
-```
+To get started rename the `.example_env` file to `.env` and change values to your own settings.
 
 To install all required Python packages run:
 ```
